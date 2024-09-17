@@ -28,12 +28,12 @@ export type RecaptchaPropsType = {
   onExpire?: () => void;
   onError?: () => void;
   onClose?: () => void;
-}
+};
 
 export type RecaptchaRef = {
   execute: () => void;
   reset: () => void;
-}
+};
 
 const Recaptcha = forwardRef(({
   id = 'react-recaptcha-that-works',
@@ -55,14 +55,14 @@ const Recaptcha = forwardRef(({
 
   const isRendered = () => {
     return typeof widgetRef.current === 'number';
-  }
+  };
 
   const updateReadyState = () => {
     if (isReady()) {
       clearInterval(readyIntervalRef.current);
       setReady(true);
     }
-  }
+  };
 
   const renderRecaptcha = () => {
     // @ts-ignore
@@ -102,8 +102,8 @@ const Recaptcha = forwardRef(({
         // @ts-ignore
         window.grecaptcha.enterprise.reset(widgetRef.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   const registerOnCloseListener = useCallback(() => {
     closeObserverRef.current?.disconnect();
@@ -113,20 +113,25 @@ const Recaptcha = forwardRef(({
       iframes,
       (e: HTMLIFrameElement) => e.src.includes('google.com/recaptcha/enterprise/bframe')
     );
-    const recaptchaElement = recaptchaFrame.parentNode.parentNode as HTMLElement;
 
-    let lastOpacity = recaptchaElement.style.opacity;
-    closeObserverRef.current = new MutationObserver(() => {
-      if (lastOpacity !== recaptchaElement.style.opacity
-        && recaptchaElement.style.opacity === '0') {
-        onClose?.();
+    if (recaptchaFrame) {
+      const recaptchaElement = recaptchaFrame.parentNode?.parentNode as HTMLElement;
+
+      if (recaptchaElement) {
+        let lastOpacity = recaptchaElement.style.opacity;
+        closeObserverRef.current = new MutationObserver(() => {
+          if (lastOpacity !== recaptchaElement.style.opacity
+            && recaptchaElement.style.opacity === '0') {
+            onClose?.();
+          }
+          lastOpacity = recaptchaElement.style.opacity;
+        });
+        closeObserverRef.current.observe(recaptchaElement, {
+          attributes: true,
+          attributeFilter: ['style'],
+        });
       }
-      lastOpacity = recaptchaElement.style.opacity;
-    });
-    closeObserverRef.current.observe(recaptchaElement, {
-      attributes: true,
-      attributeFilter: ['style'],
-    });
+    }
   }, [onClose]);
 
   useImperativeHandle(ref, () => ({
@@ -140,7 +145,7 @@ const Recaptcha = forwardRef(({
     reset: () => {
       // @ts-ignore
       window.grecaptcha.enterprise.reset(widgetRef.current);
-    }
+    },
   }), [onClose, registerOnCloseListener]);
 
   return (
