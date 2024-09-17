@@ -13,7 +13,9 @@ const isReady = () => Boolean(
   // @ts-ignore
   && window.grecaptcha
   // @ts-ignore
-  && window.grecaptcha.render
+  && window.grecaptcha.enterprise
+  // @ts-ignore
+  && window.grecaptcha.enterprise.render
 );
 
 export type RecaptchaPropsType = {
@@ -47,7 +49,7 @@ const Recaptcha = forwardRef(({
 
   const [ready, setReady] = useState(isReady());
 
-  const widgetRef = useRef();
+  const widgetRef = useRef<number>();
   const closeObserverRef = useRef<MutationObserver>();
   const readyIntervalRef = useRef<ReturnType<typeof setInterval>>();
 
@@ -64,7 +66,7 @@ const Recaptcha = forwardRef(({
 
   const renderRecaptcha = () => {
     // @ts-ignore
-    widgetRef.current = window.grecaptcha.render(id, {
+    widgetRef.current = window.grecaptcha.enterprise.render(id, {
       sitekey: siteKey,
       size,
       theme,
@@ -98,7 +100,7 @@ const Recaptcha = forwardRef(({
       closeObserverRef.current?.disconnect();
       if (isRendered()) {
         // @ts-ignore
-        window.grecaptcha.reset(widgetRef.current);
+        window.grecaptcha.enterprise.reset(widgetRef.current);
       }
     }
   }, [])
@@ -107,14 +109,16 @@ const Recaptcha = forwardRef(({
     closeObserverRef.current?.disconnect();
 
     const iframes = document.getElementsByTagName('iframe');
-    const recaptchaFrame = Array.prototype.find
-      .call(iframes, e => e.src.includes('google.com/recaptcha/api2/bframe'));
-    const recaptchaElement = recaptchaFrame.parentNode.parentNode;
+    const recaptchaFrame = Array.prototype.find.call(
+      iframes,
+      (e: HTMLIFrameElement) => e.src.includes('google.com/recaptcha/enterprise/bframe')
+    );
+    const recaptchaElement = recaptchaFrame.parentNode.parentNode as HTMLElement;
 
     let lastOpacity = recaptchaElement.style.opacity;
     closeObserverRef.current = new MutationObserver(() => {
       if (lastOpacity !== recaptchaElement.style.opacity
-        && recaptchaElement.style.opacity == 0) { // eslint-disable-line eqeqeq
+        && recaptchaElement.style.opacity === '0') {
         onClose?.();
       }
       lastOpacity = recaptchaElement.style.opacity;
@@ -131,11 +135,11 @@ const Recaptcha = forwardRef(({
         registerOnCloseListener();
       }
       // @ts-ignore
-      window.grecaptcha.execute(widgetRef.current);
+      window.grecaptcha.enterprise.execute(widgetRef.current);
     },
     reset: () => {
       // @ts-ignore
-      window.grecaptcha.reset(widgetRef.current);
+      window.grecaptcha.enterprise.reset(widgetRef.current);
     }
   }), [onClose, registerOnCloseListener]);
 
