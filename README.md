@@ -25,7 +25,7 @@ Or
 ```html
 <html>
     <head>
-        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
     </head>
     <body>
         ...
